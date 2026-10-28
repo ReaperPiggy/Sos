@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0708">
+<title>SOS Safety</title>
+<style>
+:root{--bg:#f4f1f1;--card:#fff;--item:#f0ecec;--tx:#1b1516;--mut:#6d6264;--bd:#c9bfc0;--sos:#b3261e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+:root[data-theme="dark"]{--bg:#0a0708;--card:#1f1d1e;--item:#141112;--tx:#e8e4e4;--mut:#9a9193;--bd:#555;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none;user-select:none;-webkit-user-select:none}
+#app{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;padding:12px 14px 0;gap:12px;position:relative}
+.pill{border:1.5px solid var(--bd);border-radius:40px;background:var(--card);padding:14px 18px;display:flex;align-items:center;gap:14px;font-size:clamp(20px,6vw,28px);font-weight:700}
+.pill svg{flex:none}
+.avatar{width:42px;height:42px;border-radius:50%;border:3px solid var(--mut);display:grid;place-items:center;color:var(--mut)}
+.pill .w{font-weight:400}
+.search{border-radius:30px;background:var(--card);display:flex;align-items:center;padding:0 16px;height:50px;gap:12px}
+.search input{flex:1;background:none;border:0;border-left:1px solid var(--bd);padding-left:14px;height:100%;color:var(--tx);font-size:18px;outline:0;min-width:0}
+#view{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-height:0}
+.home{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding-bottom:10px}
+.lbl{color:var(--mut);font-size:clamp(16px,4.6vw,20px);min-height:28px;padding:0 10px}
+.big{width:min(62vw,250px);aspect-ratio:1;border-radius:50%;border:0;color:#fff;font:700 clamp(44px,13vw,60px) inherit;font-family:inherit;display:grid;place-items:center;cursor:pointer;background:radial-gradient(circle at 50% 35%,var(--sos),color-mix(in srgb,var(--sos) 55%,#000));box-shadow:0 0 50px color-mix(in srgb,var(--sos) 35%,transparent),inset 0 -6px 18px rgba(0,0,0,.35);transition:transform .15s}
+.big:active{transform:scale(.95)}
+.big.count{border:4px solid color-mix(in srgb,var(--sos) 70%,#fff)}
+.big.safe{background:radial-gradient(circle at 50% 35%,#3f8b32,#235a1c);box-shadow:0 0 50px rgba(63,139,50,.3)}
+.big.pulse{animation:pl 1.2s infinite}
+@keyframes pl{50%{box-shadow:0 0 0 22px rgba(63,139,50,.12),0 0 60px rgba(63,139,50,.4)}}
+.btn{border:1.5px solid var(--bd);background:var(--card);color:var(--tx);border-radius:30px;padding:15px 34px;font-size:20px;font-family:inherit;display:inline-flex;gap:12px;align-items:center;justify-content:center;cursor:pointer}
+.btn:active{opacity:.7}.btn.pri{background:var(--sos);border-color:var(--sos);color:#fff}
+.panel{background:var(--card);border-radius:26px;padding:22px 16px;display:flex;flex-direction:column;gap:10px}
+.panel h2{margin:0 0 8px 8px;font-weight:400;font-size:24px}
+.row{background:var(--item);border-radius:28px;padding:0 20px;min-height:58px;display:flex;align-items:center;gap:14px;font-size:18px;cursor:pointer;text-decoration:none;color:var(--tx)}
+.row .g{flex:1;padding:12px 0}.row small{display:block;color:var(--mut);font-size:15px;margin-top:3px}
+.row.c{padding-left:14px}
+.fab{align-self:center;width:72px;height:72px;border-radius:50%;border:0;background:radial-gradient(circle at 50% 35%,var(--sos),color-mix(in srgb,var(--sos) 55%,#000));color:#fff;font-size:42px;cursor:pointer;margin-top:18px;flex:none}
+.chk{width:26px;height:26px;border-radius:7px;border:2px solid var(--mut);display:grid;place-items:center;color:#fff;flex:none}
+.chk.on{background:#d33;border-color:#d33}
+nav{display:flex;background:var(--card);border-radius:34px 34px 0 0;border:1px solid color-mix(in srgb,var(--bd) 50%,transparent);border-bottom:0;margin:0 -14px;padding:12px 6px calc(10px + env(safe-area-inset-bottom,0px));flex:none}
+nav button{flex:1;background:none;border:0;color:var(--tx);display:flex;flex-direction:column;align-items:center;gap:6px;font:15px inherit;font-family:inherit;cursor:pointer;padding:4px 0}
+nav button.on{color:var(--sos)}nav button.on span{color:var(--tx)}
+#sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:20}
+#sheetbg.show{display:flex}
+#sheet{background:var(--card);width:100%;max-width:480px;border-radius:28px 28px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;max-height:85dvh;overflow:auto}
+#sheet h3{margin:0;font-size:22px}
+#sheet label{font-size:15px;color:var(--mut);display:flex;flex-direction:column;gap:6px}
+#sheet input[type=text],#sheet input[type=tel],#sheet textarea,#sheet select{background:var(--item);border:1px solid var(--bd);border-radius:14px;padding:13px;color:var(--tx);font:17px inherit;font-family:inherit;user-select:text;-webkit-user-select:text;width:100%}
+#sheet textarea{min-height:120px;resize:vertical}
+.sw{display:flex;gap:14px;flex-wrap:wrap}.sw i{width:48px;height:48px;border-radius:50%;cursor:pointer;border:3px solid transparent}.sw i.on{border-color:var(--tx)}
+#toast{position:fixed;left:50%;bottom:calc(110px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#333;color:#fff;padding:12px 20px;border-radius:24px;font-size:16px;opacity:0;pointer-events:none;transition:.25s;z-index:40;max-width:88vw;text-align:center}
+#toast.show{opacity:1}
+#fc{position:fixed;inset:0;background:linear-gradient(#1c2a3a,#0b0f14);color:#fff;z-index:30;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(80px + env(safe-area-inset-top,0px)) 20px calc(70px + env(safe-area-inset-bottom,0px));text-align:center}
+#fc.show{display:flex}#fc h1{margin:8px 0;font-size:36px;font-weight:500}#fc p{margin:0;color:#aab;font-size:18px}
+#fc .bt{display:flex;gap:70px}#fc .bt button{width:76px;height:76px;border-radius:50%;border:0;color:#fff;font-size:30px;cursor:pointer;display:grid;place-items:center}
+.red{background:#e0322b}.grn{background:#2fb344;animation:rg 1s infinite}@keyframes rg{50%{transform:scale(1.1)}}
+.av2{width:110px;height:110px;border-radius:50%;background:#37485c;display:grid;place-items:center;margin:0 auto 18px}
+.empty{color:var(--mut);text-align:center;padding:18px;font-size:16px}
+/* ===== polish layer ===== */
+:root{--glass:rgba(255,255,255,.7);--line:rgba(0,0,0,.08);--shadow:0 10px 30px rgba(40,20,20,.12)}
+:root[data-theme="dark"]{--glass:rgba(34,30,32,.62);--line:rgba(255,255,255,.09);--shadow:0 12px 34px rgba(0,0,0,.55)}
+body{background:radial-gradient(120% 60% at 50% 38%,color-mix(in srgb,var(--sos) 22%,transparent),transparent 62%),radial-gradient(90% 40% at 100% 0,color-mix(in srgb,var(--sos) 10%,transparent),transparent),var(--bg);background-attachment:fixed;letter-spacing:.1px}
+#app{padding-top:10px;gap:14px}
+.pill,.search,.panel,#sheet{background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border:1px solid var(--line);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.07)}
+.pill{border-radius:30px;padding:12px 16px;font-size:clamp(19px,5.6vw,24px);font-weight:600;animation:rise .5s both}
+.avatar{width:44px;height:44px;border:0;background:linear-gradient(135deg,var(--sos),color-mix(in srgb,var(--sos) 40%,#000));color:#fff;box-shadow:0 4px 14px color-mix(in srgb,var(--sos) 45%,transparent)}
+.pill .w{opacity:.75}
+.search{border-radius:22px;height:52px;animation:rise .5s .08s both}
+.search svg{color:var(--mut)}.search input{border-left:0;padding-left:0;font-size:17px}.search input::placeholder{color:var(--mut)}
+.search:focus-within{border-color:var(--sos);box-shadow:0 0 0 4px color-mix(in srgb,var(--sos) 22%,transparent)}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.home{gap:18px;animation:rise .5s .12s both}
+.lbl{font-size:clamp(15px,4.2vw,18px);letter-spacing:.3px}
+.big{position:relative;width:min(58vw,240px);font-weight:800;letter-spacing:2px;text-shadow:0 2px 10px rgba(0,0,0,.4);background:radial-gradient(circle at 35% 25%,color-mix(in srgb,var(--sos) 60%,#fff),var(--sos) 45%,color-mix(in srgb,var(--sos) 45%,#000));box-shadow:0 18px 50px color-mix(in srgb,var(--sos) 55%,transparent),0 0 0 10px color-mix(in srgb,var(--sos) 14%,transparent),0 0 0 22px color-mix(in srgb,var(--sos) 7%,transparent),inset 0 -10px 24px rgba(0,0,0,.35),inset 0 8px 16px rgba(255,255,255,.22)}
+.big::before,.big::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--sos);opacity:0;animation:rip 2.8s infinite;pointer-events:none}
+.big::after{animation-delay:1.4s}
+@keyframes rip{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.7);opacity:0}}
+.big.count{border:0;animation:beat 1s infinite}.big.count::before,.big.count::after{animation-duration:1s}
+@keyframes beat{50%{transform:scale(1.05)}}
+.big.safe{background:radial-gradient(circle at 35% 25%,#7fd46f,#3f9b32 45%,#1d5516);box-shadow:0 18px 50px rgba(63,155,50,.5),0 0 0 10px rgba(63,155,50,.14),0 0 0 22px rgba(63,155,50,.07),inset 0 -10px 24px rgba(0,0,0,.35),inset 0 8px 16px rgba(255,255,255,.25)}
+.big.safe::before,.big.safe::after{border-color:#4caf3c}.big.pulse{animation:none}
+.btn{border-radius:22px;padding:14px 28px;font-size:18px;font-weight:500;background:var(--glass);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .12s}
+.btn:active{transform:scale(.96);opacity:1}
+.btn.pri{background:linear-gradient(135deg,var(--sos),color-mix(in srgb,var(--sos) 55%,#000));border:0;box-shadow:0 8px 22px color-mix(in srgb,var(--sos) 45%,transparent)}
+.btn svg{color:var(--sos)}
+.panel{border-radius:28px;padding:20px 14px;animation:rise .45s both}
+.panel h2{font-size:22px;font-weight:600;margin-bottom:6px}
+.row{background:var(--item);background:color-mix(in srgb,var(--item) 80%,transparent);border:1px solid var(--line);border-radius:20px;min-height:60px;transition:transform .12s,background .2s;animation:rise .4s both}
+.row:nth-child(2){animation-delay:.04s}.row:nth-child(3){animation-delay:.08s}.row:nth-child(4){animation-delay:.12s}.row:nth-child(5){animation-delay:.16s}.row:nth-child(6){animation-delay:.2s}.row:nth-child(7){animation-delay:.24s}.row:nth-child(8){animation-delay:.28s}
+.row:active{transform:scale(.98)}
+.row svg{color:var(--sos)}
+.row[data-a=open]::after{content:"›";font-size:28px;color:var(--mut);line-height:1}
+a.row svg{background:color-mix(in srgb,var(--sos) 16%,transparent);padding:7px;width:40px;height:40px;border-radius:50%}
+.row.c .avatar{width:50px!important;height:50px!important}
+.row.c [data-a=del]{color:var(--mut)}
+.chk{border-radius:8px;transition:.2s}.chk.on{background:var(--sos);border-color:var(--sos);box-shadow:0 0 12px color-mix(in srgb,var(--sos) 50%,transparent)}
+.fab{width:64px;height:64px;font-size:34px;font-weight:300;background:linear-gradient(135deg,var(--sos),color-mix(in srgb,var(--sos) 50%,#000));box-shadow:0 10px 26px color-mix(in srgb,var(--sos) 50%,transparent);margin-top:auto;transition:transform .12s}.fab:active{transform:scale(.92)}
+nav{margin:0 0 10px;padding:8px 6px;border-radius:30px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:var(--shadow);gap:2px}
+nav button{border-radius:22px;font-size:12.5px;font-weight:500;color:var(--mut);padding:8px 0;transition:.2s}
+nav button svg{width:26px;height:26px}
+nav button.on{color:var(--sos);background:color-mix(in srgb,var(--sos) 14%,transparent)}nav button.on span{color:var(--tx);font-weight:600}
+#sheet{border-radius:30px 30px 0 0;background:var(--card);animation:up .3s both}
+#sheetbg{-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+#sheet input[type=text],#sheet input[type=tel],#sheet textarea,#sheet select{border-radius:16px;border:1px solid var(--line)}
+#sheet input:focus,#sheet textarea:focus,#sheet select:focus{outline:2px solid var(--sos);outline-offset:1px}
+.sw i{box-shadow:0 4px 14px rgba(0,0,0,.35)}
+#toast{background:var(--tx);color:var(--bg);border-radius:18px;box-shadow:var(--shadow)}
+#fc .av2{background:linear-gradient(135deg,#5a7699,#2b3a4d);box-shadow:0 0 0 14px rgba(255,255,255,.05),0 0 0 30px rgba(255,255,255,.03)}
+/* ===== larger layout ===== */
+#app{max-width:560px;padding:calc(14px) 18px 0;gap:16px}
+.pill{padding:16px 20px;font-size:clamp(24px,7vw,32px);gap:16px;border-radius:34px}
+.avatar{width:54px;height:54px}.avatar svg{width:30px;height:30px}
+.search{height:62px;border-radius:26px;padding:0 20px}.search svg{width:28px;height:28px}.search input{font-size:20px}
+.home{gap:24px;justify-content:space-evenly}
+.lbl{font-size:clamp(18px,5.2vw,23px);min-height:34px}
+.big{width:min(74vw,320px);font-size:clamp(60px,18vw,84px);box-shadow:0 22px 60px color-mix(in srgb,var(--sos) 55%,transparent),0 0 0 14px color-mix(in srgb,var(--sos) 14%,transparent),0 0 0 30px color-mix(in srgb,var(--sos) 7%,transparent),inset 0 -12px 28px rgba(0,0,0,.35),inset 0 10px 18px rgba(255,255,255,.22)}
+.big.safe{font-size:clamp(46px,14vw,66px);box-shadow:0 22px 60px rgba(63,155,50,.5),0 0 0 14px rgba(63,155,50,.14),0 0 0 30px rgba(63,155,50,.07),inset 0 -12px 28px rgba(0,0,0,.35),inset 0 10px 18px rgba(255,255,255,.25)}
+.btn{font-size:clamp(19px,5.4vw,23px);padding:18px 36px;min-width:min(78%,300px);border-radius:26px}
+.btn svg{width:30px;height:30px}
+.panel{padding:24px 16px;gap:12px;border-radius:32px}
+.panel h2{font-size:clamp(24px,6.6vw,30px);margin:0 0 10px 8px}
+.row{min-height:72px;font-size:clamp(19px,5.2vw,23px);padding:0 22px;border-radius:24px;gap:16px}
+.row small{font-size:clamp(16px,4.4vw,19px)}
+.row svg{width:32px;height:32px}
+a.row svg{width:48px;height:48px;padding:9px}
+.row.c .avatar{width:58px!important;height:58px!important}
+.row.c [data-a=del] svg{width:34px;height:34px}
+.chk{width:32px;height:32px;border-radius:10px;font-size:20px}
+.fab{width:76px;height:76px;font-size:42px}
+nav{padding:10px 8px;margin-bottom:12px;border-radius:34px}
+nav button{font-size:clamp(13px,3.7vw,15px);padding:10px 0;gap:6px}
+nav button svg{width:32px;height:32px}
+#sheet{max-width:560px;padding:26px 22px calc(26px + env(safe-area-inset-bottom,0px));gap:16px}
+#sheet h3{font-size:26px}#sheet label{font-size:17px}
+#sheet input[type=text],#sheet input[type=tel],#sheet textarea,#sheet select{font-size:19px;padding:16px}
+#sheet .btn{width:100%}
+.sw i{width:56px;height:56px}
+#toast{font-size:18px;padding:14px 24px}
+#fc h1{font-size:44px}#fc p{font-size:21px}#fc .bt button{width:88px;height:88px;font-size:36px}
+@media (max-height:700px){.big{width:min(60vw,240px)}.home{gap:14px}}
+/* ===== fluid scaling: everything sized from the screen ===== */
+:root{--u:min(calc(100vw / 390),calc(100dvh / 800),1.3px)}
+#app{max-width:calc(var(--u) * 440);padding:calc(var(--u) * 12) calc(var(--u) * 16) 0;gap:calc(var(--u) * 12)}
+.pill{padding:calc(var(--u) * 10) calc(var(--u) * 16);font-size:calc(var(--u) * 24);gap:calc(var(--u) * 12);border-radius:calc(var(--u) * 30)}
+.avatar{width:calc(var(--u) * 42);height:calc(var(--u) * 42)}.avatar svg{width:calc(var(--u) * 24);height:calc(var(--u) * 24)}
+.pill>span:first-child svg{width:calc(var(--u) * 30);height:calc(var(--u) * 30)}
+.search{height:calc(var(--u) * 50);padding:0 calc(var(--u) * 16);border-radius:calc(var(--u) * 22);gap:calc(var(--u) * 10)}
+.search svg{width:calc(var(--u) * 22);height:calc(var(--u) * 22)}.search input{font-size:max(16px,calc(var(--u) * 17))}
+.home{gap:calc(var(--u) * 14);justify-content:center}
+.lbl{font-size:calc(var(--u) * 17);min-height:calc(var(--u) * 24)}
+.big{width:calc(var(--u) * 220);font-size:calc(var(--u) * 54);box-shadow:0 calc(var(--u) * 16) calc(var(--u) * 44) color-mix(in srgb,var(--sos) 55%,transparent),0 0 0 calc(var(--u) * 9) color-mix(in srgb,var(--sos) 14%,transparent),0 0 0 calc(var(--u) * 20) color-mix(in srgb,var(--sos) 7%,transparent),inset 0 -8px 22px rgba(0,0,0,.35),inset 0 8px 14px rgba(255,255,255,.22)}
+.big.safe{font-size:calc(var(--u) * 42);box-shadow:0 calc(var(--u) * 16) calc(var(--u) * 44) rgba(63,155,50,.5),0 0 0 calc(var(--u) * 9) rgba(63,155,50,.14),0 0 0 calc(var(--u) * 20) rgba(63,155,50,.07),inset 0 -8px 22px rgba(0,0,0,.35),inset 0 8px 14px rgba(255,255,255,.25)}
+.btn{font-size:calc(var(--u) * 18);padding:calc(var(--u) * 14) calc(var(--u) * 28);min-width:calc(var(--u) * 220);border-radius:calc(var(--u) * 22);gap:calc(var(--u) * 10)}
+.btn svg{width:calc(var(--u) * 24);height:calc(var(--u) * 24)}
+.home .btn[style]{font-size:calc(var(--u) * 15)!important;padding:calc(var(--u) * 10) calc(var(--u) * 18)!important;min-width:0}
+.panel{padding:calc(var(--u) * 16) calc(var(--u) * 12);gap:calc(var(--u) * 8);border-radius:calc(var(--u) * 26)}
+.panel h2{font-size:calc(var(--u) * 22);margin:0 0 calc(var(--u) * 6) calc(var(--u) * 6)}
+.row{min-height:calc(var(--u) * 54);font-size:calc(var(--u) * 17);padding:0 calc(var(--u) * 18);border-radius:calc(var(--u) * 20);gap:calc(var(--u) * 12)}
+.row .g{padding:calc(var(--u) * 8) 0}.row small{font-size:calc(var(--u) * 14)}
+.row svg{width:calc(var(--u) * 26);height:calc(var(--u) * 26)}
+a.row svg{width:calc(var(--u) * 38);height:calc(var(--u) * 38);padding:calc(var(--u) * 7)}
+.row.c{padding-left:calc(var(--u) * 10)}
+.row.c .avatar{width:calc(var(--u) * 44)!important;height:calc(var(--u) * 44)!important}
+.row.c [data-a=del] svg{width:calc(var(--u) * 26);height:calc(var(--u) * 26)}
+.row[data-a=open]::after{font-size:calc(var(--u) * 24)}
+.chk{width:calc(var(--u) * 26);height:calc(var(--u) * 26);border-radius:calc(var(--u) * 8);font-size:calc(var(--u) * 16)}
+.fab{width:calc(var(--u) * 62);height:calc(var(--u) * 62);font-size:calc(var(--u) * 34)}
+nav{padding:calc(var(--u) * 6);margin-bottom:calc(var(--u) * 8);border-radius:calc(var(--u) * 28)}
+nav button{font-size:calc(var(--u) * 12);padding:calc(var(--u) * 7) 0;gap:calc(var(--u) * 4);border-radius:calc(var(--u) * 22)}
+nav button svg{width:calc(var(--u) * 26);height:calc(var(--u) * 26)}
+#sheet{max-width:calc(var(--u) * 440);padding:calc(var(--u) * 20) calc(var(--u) * 18) calc(var(--u) * 20 + env(safe-area-inset-bottom,0px));gap:calc(var(--u) * 12);border-radius:calc(var(--u) * 26) calc(var(--u) * 26) 0 0}
+#sheet h3{font-size:calc(var(--u) * 22)}#sheet label{font-size:calc(var(--u) * 14)}
+#sheet input[type=text],#sheet input[type=tel],#sheet textarea,#sheet select{font-size:max(16px,calc(var(--u) * 16));padding:calc(var(--u) * 12)}
+#sheet textarea{min-height:calc(var(--u) * 100)}
+.sw{gap:calc(var(--u) * 12)}.sw i{width:calc(var(--u) * 46);height:calc(var(--u) * 46)}
+#toast{font-size:calc(var(--u) * 15);padding:calc(var(--u) * 11) calc(var(--u) * 20);bottom:calc(var(--u) * 100 + env(safe-area-inset-bottom,0px))}
+#fc{padding-top:calc(var(--u) * 70 + env(safe-area-inset-top,0px));padding-bottom:calc(var(--u) * 60 + env(safe-area-inset-bottom,0px))}
+#fc h1{font-size:calc(var(--u) * 36)}#fc p{font-size:calc(var(--u) * 18)}
+#fc .bt{gap:calc(var(--u) * 60)}#fc .bt button{width:calc(var(--u) * 72);height:calc(var(--u) * 72);font-size:calc(var(--u) * 28)}
+.av2{width:calc(var(--u) * 100);height:calc(var(--u) * 100)}.av2 svg{width:calc(var(--u) * 54);height:calc(var(--u) * 54)}
+#view{padding-bottom:calc(var(--u) * 4)}
+/* ===== UX upgrade ===== */
+:root{--mut:#574c4e}:root[data-theme="dark"]{--mut:#b9b0b2}
+:focus-visible{outline:3px solid var(--sos);outline-offset:3px;border-radius:12px}
+.big{touch-action:none;-webkit-touch-callout:none}
+.big.holding{transform:scale(.94)}
+.ring{position:absolute;left:-10%;top:-10%;width:120%;height:120%;transform:rotate(-90deg);pointer-events:none;overflow:visible}
+.ring circle{fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;opacity:.9}
+.big.holding .ring circle{transition:stroke-dashoffset .9s linear;stroke-dashoffset:0}
+.big.safe{font-size:calc(var(--u) * 34)}
+.stl{display:flex;flex-direction:column;gap:calc(var(--u) * 6);align-items:flex-start;margin:0 auto;width:max-content;max-width:100%}
+.st{display:flex;align-items:center;gap:calc(var(--u) * 10);font-size:calc(var(--u) * 16);color:var(--tx)}
+.st i{width:calc(var(--u) * 11);height:calc(var(--u) * 11);border-radius:50%;background:var(--mut);flex:none}
+.st.ok i{background:#4caf3c;box-shadow:0 0 10px #4caf3c}.st.no i{background:#e0322b}.st.wait i{background:#f5a623;animation:bl 1s infinite}
+@keyframes bl{50%{opacity:.3}}
+.acts{display:flex;gap:calc(var(--u) * 10);justify-content:center;flex-wrap:wrap}
+.acts .btn{min-width:0;font-size:calc(var(--u) * 16);padding:calc(var(--u) * 12) calc(var(--u) * 20);text-decoration:none}
+.lnk{background:none;border:0;color:var(--mut);font:inherit;font-size:calc(var(--u) * 15);text-decoration:underline;padding:calc(var(--u) * 6);cursor:pointer}
+.sub{margin:0;color:var(--mut);font-size:calc(var(--u) * 15)}
+.row.ob{cursor:default}
+.mini{border:0;border-radius:calc(var(--u) * 16);padding:calc(var(--u) * 9) calc(var(--u) * 18);background:var(--sos);color:#fff;font:inherit;font-size:calc(var(--u) * 15);font-weight:600;cursor:pointer;flex:none}
+#sheet input[type=range]{width:100%;accent-color:var(--sos);padding:0}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="pill" id="hdr"></div>
+  <div id="sr" class="search"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/></svg><input id="srin" placeholder="Safe Route" enterkeyhint="go" autocomplete="off"></div>
+  <div id="view" aria-live="polite"></div>
+  <nav id="nav"></nav>
+</div>
+<div id="sheetbg"><div id="sheet"></div></div>
+<div id="fc"></div>
+<div id="toast"></div>
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+var D={contacts:[],msg:"I’m in danger and need help. Please contact me or call emergency services right away.",cd:5,vib:true,snd:true,siren:true,ui:true,vol:.8,color:"#b3261e",fn:"Mom",fnum:"+91 98765 43210",fd:5,dis:false,dark:true,name:"User"};
+var S=Object.assign({},D);
+try{var r=localStorage.getItem("sosapp");if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+function save(){try{localStorage.setItem("sosapp",JSON.stringify(S))}catch(e){}}
+if(!S.seeded){if(!S.contacts.length)S.contacts=[{name:"Mom",phone:"+91 98765 43210"},{name:"Dad",phone:"+91 98765 43211"}];S.seeded=true;save()}
+var holdK=[],holdT=null,startedAt=0,locS="",smsS="",wl=null;
+var tab="home",mode="idle",n=0,tmr=null,sirenT=null,vibT=null,ringT=null,fcT=null,callT=null,ac=null,loc="";
+var I={
+home:'<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l10 8.5h-3v10h-5v-6h-4v6H5V11H2z"/></svg>',
+phone:'<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011-.25 11 11 0 003.6.6 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.250.2 2.450.6 3.600a1 1 0 01-.25 1z"/></svg>',
+phs:'<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011-.25 11 11 0 003.6.6 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.250.2 2.450.6 3.600a1 1 0 01-.25 1z"/></svg>',
+add:'<svg width="38" height="34" viewBox="0 0 28 24" fill="currentColor"><circle cx="10" cy="7" r="5"/><path d="M0 22c0-5 4-8 10-8s10 3 10 8z"/><path d="M23 4v8M19 8h8" stroke="currentColor" stroke-width="2.600" stroke-linecap="round"/></svg>',
+set:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round"><circle cx="12" cy="12" r="3.500" fill="currentColor"/><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>',
+back:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.200" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4l-8 8 8 8"/></svg>',
+user:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round"><circle cx="12" cy="8" r="3.500"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6z"/></svg>',
+trash:'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>',
+wa:'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.700-5A9 9 0 1112 21a9 9 0 01-4.300-1.100z"/><path d="M9 8c0 4 3 7 7 7l1-2-2.500-1-1 1c-1-.5-2-1.500-2.500-2.500l1-1L11 8z" fill="currentColor"/></svg>',
+dl:'<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M10 3h4v7h4l-6 6-6-6h4zM3 18h18v3H3z"/></svg>'
+};
+/* ---------- feedback ---------- */
+function vib(p){if(!S.vib)return;if(navigator.vibrate){try{navigator.vibrate(p)}catch(e){}return}var a=[].concat(p),t=0;a.forEach(function(d,i){if(i%2===0&&d>0)setTimeout(tickIOS,t);t+=d})}
+function ctx(){try{if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume()}catch(e){}return ac}
+function tone(f,d,v,t){if(!S.snd&&t!=="force")return;var c=ctx();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t==="sq"?"square":"sine";o.frequency.value=f;g.gain.setValueAtTime((v||.2)*(+S.vol||.8),c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d)}
+function startSiren(){if(!S.siren||!S.snd||sirenT)return;var hi=false;var go=function(){tone(hi?950:650,.38,.35,"sq");hi=!hi};go();sirenT=setInterval(go,400)}
+function stopSiren(){clearInterval(sirenT);sirenT=null}
+function toast(m){var t=$("#toast");t.textContent=m;t.className="show";clearTimeout(t._t);t._t=setTimeout(function(){t.className=""},2600)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+/* ---------- SOS flow ---------- */
+function startSOS(){ctx();startedAt=Date.now();wake(true);mode="count";n=S.cd;tick0();tmr=setInterval(function(){n--;if(n<=0){clearInterval(tmr);trigger()}else tick0();draw()},1000);draw()}
+function tick0(){tone(660+(S.cd-n)*70,.12,.25);vib(n<=2?[130]:[60])}
+function cancelSOS(){clearInterval(tmr);clearInterval(vibT);stopSiren();wake(false);mode="idle";vib(0);if(navigator.vibrate)navigator.vibrate(0);draw()}
+function trigger(){mode="active";tone(1200,.5,.4,"sq");vib([400,120,400]);vibT=setInterval(function(){vib([300,150,300])},2500);startSiren();draw();
+ locS="wait";smsS="wait";getLoc(function(){locS=loc?"ok":"no";sendSMS(true);draw()})}
+function imSafe(){var had=S.contacts.length;cancelSOS();chime();vib([60,40,120]);if(had){var nums=S.contacts.map(function(c){return c.phone.replace(/[^\d+]/g,"")}).join(",");location.href="sms:"+nums+"?&body="+encodeURIComponent("I’m safe now. Thank you for checking in.")}}
+function wake(on){try{if(on&&navigator.wakeLock){navigator.wakeLock.request("screen").then(function(l){wl=l}).catch(function(){})}else if(!on&&wl){wl.release();wl=null}}catch(e){}}
+function st(k,l){return '<div class="st '+k+'"><i></i>'+l+'</div>'}
+function statusHtml(){return '<div class="stl">'+st(locS||"wait",locS==="ok"?"Location shared":locS==="no"?"Location unavailable":"Getting location…")+st(smsS||"wait",smsS==="ok"?"Message ready for "+S.contacts.length+" contact"+(S.contacts.length>1?"s":""):smsS==="no"?"No contacts saved":"Preparing message…")+st(S.snd&&S.siren?"ok":"no",S.snd&&S.siren?"Siren on":"Siren off")+'</div>'}
+function getLoc(cb){if(!navigator.geolocation){cb();return}navigator.geolocation.getCurrentPosition(function(p){loc="https://maps.google.com/?q="+p.coords.latitude+","+p.coords.longitude;cb()},function(){cb()},{enableHighAccuracy:true,timeout:6000,maximumAge:30000})}
+function sendSMS(auto){if(!S.contacts.length){smsS="no";if(!auto)toast("Add an emergency contact first");return}smsS="ok";
+ var nums=S.contacts.map(function(c){return c.phone.replace(/[^\d+]/g,"")}).join(",");
+ var body=S.msg+(loc?"\nMy live location: "+loc:"\n(Location unavailable)");
+ location.href="sms:"+nums+"?&body="+encodeURIComponent(body)}
+/* ---------- fake call ---------- */
+function fakeCall(){ctx();toast("Fake call in "+S.fd+"s");vib(60);fcT=setTimeout(ring,S.fd*1000)}
+function ring(){var el=$("#fc");el.className="show";
+ el.innerHTML='<div><div class="av2">'+I.user.replace(/26/g,"60")+'</div><h1>'+esc(S.fn)+'</h1><p>'+esc(S.fnum)+'</p><p id="fcs" style="margin-top:10px">Incoming call…</p></div><div class="bt"><button class="red" data-a="fend" aria-label="Decline">✕</button><button class="grn" data-a="facc" aria-label="Answer">✆</button></div>';
+ var go=function(){tone(480,.35,.3,"force");setTimeout(function(){tone(620,.35,.3,"force")},400);vib([500,300,500])};go();ringT=setInterval(go,2200)}
+function accept(){clearInterval(ringT);if(navigator.vibrate)navigator.vibrate(0);var s=0;$("#fcs").textContent="00:00";
+ $(".bt").innerHTML='<button class="red" data-a="fend" aria-label="End">✕</button>';
+ callT=setInterval(function(){s++;var m=("0"+Math.floor(s/60)).slice(-2),x=("0"+s%60).slice(-2);var e=$("#fcs");if(e)e.textContent=m+":"+x},1000)}
+function endCall(){clearInterval(ringT);clearInterval(callT);clearTimeout(fcT);if(navigator.vibrate)navigator.vibrate(0);$("#fc").className=""}
+/* ---------- views ---------- */
+var HL=[["Ambulance","102","tel:102"],["Police","100","tel:100"],["Fire & Rescue Services","101","tel:101"],["Women Crisis Response","1091","tel:1091"],["NCW WhatsApp","","https://wa.me/917217735372"],["Accidents","108","tel:108"],["Emergency Police","112","tel:112"]];
+function chk(on){return '<span class="chk'+(on?" on":"")+'">'+(on?"✓":"")+'</span>'}
+function draw(){
+ var dis=S.dis;document.title=dis?"Calculator":"SOS Safety";
+ var home=tab==="home";
+ $("#sr").style.display=home?"flex":"none";
+ var h=$("#hdr");
+ h.innerHTML=home?'<div class="avatar">'+I.user+'</div><span><b>Hi,</b> <span class="w">'+esc(S.name)+'</span></span>':'<span data-a="tab" data-t="home" style="cursor:pointer;display:flex">'+I.back+'</span><span>'+({helpline:"Helplines",contacts:"Add Contact",settings:"Settings"})[tab]+'</span>';
+ var v="";
+ if(tab==="home"){
+  var cls="big",txt='<svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48" pathLength="100"/></svg>'+(dis?"=":"SOS"),top="",bot=dis?"Press and hold to start":"Press and hold to activate",extra='<button class="btn" data-a="fake">'+I.phs+'Fake Call</button>';
+  if(mode==="count"){cls+=" count";txt=n;top="Sending emergency alert in";bot="Tap to cancel";extra=""}
+  if(mode==="active"){cls="big safe pulse";txt="I’M SAFE";top="Alert active – tap when you’re safe";bot=statusHtml()||S.contacts.length?"Emergency contacts have been notified":"No contacts saved – call 112";extra='<div class="acts"><a class="btn" href="tel:112">Call 112</a><button class="btn" data-a="resend">Resend SMS</button></div><button class="lnk" data-a="cancel">Cancel alert (false alarm)</button>'}
+  v='<div class="home"><div class="lbl">'+top+'</div><button class="'+cls+'" data-a="sos" aria-label="SOS" '+(dis&&mode==="idle"?'style="background:radial-gradient(circle at 50% 35%,#667,#334);box-shadow:none"':'')+'>'+txt+'</button><div class="lbl">'+bot+'</div>'+extra+'</div>';
+ }
+ if(tab==="helpline"){v='<div class="panel"><h2>Instant Helplines</h2>'+HL.map(function(x){return '<a class="row" href="'+x[2]+'"'+(x[1]?"":' target="_blank" rel="noopener"')+'><span class="g">'+x[0]+(x[1]?" - "+x[1]:"")+'</span>'+(x[1]?I.phs:I.wa)+'</a>'}).join("")+'</div>'}
+ if(tab==="contacts"){v='<div class="panel" style="flex:1"><h2>Your Contact List</h2>'+(S.contacts.length?S.contacts.map(function(c,i){return '<div class="row c"><div class="avatar" style="width:54px;height:54px">'+I.user+'</div><div class="g">'+esc(c.name)+'<small>'+esc(c.phone)+'</small></div><span data-a="del" data-i="'+i+'" style="padding:10px;cursor:pointer" aria-label="Delete">'+I.trash+'</span></div>'}).join(""):'<div class="empty">No emergency contacts yet. Tap + to add people who should get your SOS alert.</div>')+'<button class="fab" data-a="addc" aria-label="Add">+</button></div>'}
+ if(tab==="settings"){v='<div class="panel">'+[["Safety Setup","ob"],["Edit SOS Message","sm"],["SOS Customization","sc"],["SOS UI Color","col"],["Fake Call Customization","fcs"]].map(function(x){return '<div class="row" data-a="open" data-s="'+x[1]+'"><span class="g">'+x[0]+'</span></div>'}).join("")+'<div class="row" data-a="map"><span class="g">Download Offline Map</span>'+I.dl+'</div><div class="row" data-a="dis"><span class="g">Disguise Mode</span>'+chk(S.dis)+'</div><div class="row" data-a="dark"><span class="g">Dark Mode</span>'+chk(S.dark)+'</div></div>'}
+ $("#view").innerHTML=v;
+ var N=[["home","Home",I.home],["helpline","Helpline",I.phone],["contacts","Add Contact",I.add],["settings","Settings",I.set]];
+ $("#nav").innerHTML=N.map(function(x){return '<button data-a="tab" data-t="'+x[0]+'" class="'+(tab===x[0]?"on":"")+'">'+x[2]+'<span>'+x[1]+'</span></button>'}).join("");
+ document.documentElement.dataset.theme=S.dark?"dark":"light";
+ document.querySelectorAll("#view [data-a],#hdr [data-a]").forEach(function(el){if(el.tagName!=="BUTTON"&&el.tagName!=="A"){el.tabIndex=0;el.setAttribute("role","button")}});
+ document.documentElement.style.setProperty("--sos",S.color);
+}
+function sheet(h){$("#sheet").innerHTML=h;$("#sheetbg").className="show"}
+function closeSheet(){$("#sheetbg").className="";draw()}
+function fld(l,k,t){return '<label>'+l+'<input type="'+(t||"text")+'" data-k="'+k+'" value="'+esc(S[k])+'"></label>'}
+function tg(l,k){return '<div class="row" data-a="tg" data-k="'+k+'" style="min-height:52px"><span class="g">'+l+'</span>'+chk(S[k])+'</div>'}
+function openS(s){if(s==="ob")return onb();
+ if(s==="sm")sheet('<h3>Edit SOS Message</h3><label>Sent to your contacts with your location<textarea data-k="msg">'+esc(S.msg)+'</textarea></label><button class="btn pri" data-a="close">Done</button>');
+ if(s==="sc")sheet('<h3>SOS Customization</h3><label>Countdown<select data-k="cd" data-n="1">'+[3,5,7,10].map(function(x){return '<option'+(S.cd===x?" selected":"")+' value="'+x+'">'+x+' seconds</option>'}).join("")+'</select></label>'+tg("Vibration & haptics","vib")+tg("Sound","snd")+tg("Siren when SOS is sent","siren")+tg("Tap sounds","ui")+'<label>Volume<input type="range" data-k="vol" min="0.2" max="1" step="0.1" value="'+S.vol+'"></label>'+'<button class="btn" data-a="test">Test sound & vibration</button><button class="btn pri" data-a="close">Done</button>');
+ if(s==="col")sheet('<h3>SOS UI Color</h3><div class="sw">'+["#b3261e","#e8590c","#c2255c","#7048e8","#1971c2","#0b7285"].map(function(c){return '<i data-a="color" data-c="'+c+'" class="'+(S.color===c?"on":"")+'" style="background:'+c+'"></i>'}).join("")+'</div><button class="btn pri" data-a="close">Done</button>');
+ if(s==="fcs")sheet('<h3>Fake Call Customization</h3>'+fld("Caller name","fn")+fld("Caller number","fnum","tel")+'<label>Ring after<select data-k="fd" data-n="1">'+[0,5,10,30,60].map(function(x){return '<option'+(S.fd===x?" selected":"")+' value="'+x+'">'+(x?x+" seconds":"Immediately")+'</option>'}).join("")+'</select></label><button class="btn pri" data-a="close">Done</button>');
+}
+/* ---------- events ---------- */
+document.addEventListener("click",function(e){
+ var t=e.target.closest("[data-a]");
+ if(e.target.id==="sheetbg"){closeSheet();return}
+ if(!t)return;var a=t.dataset.a;
+ if(a==="tab"){tab=t.dataset.t;draw()}
+ else if(a==="sos"){if(Date.now()-startedAt<800)return;if(mode==="idle"){if(e.detail===0)startSOS();else toast("Press and hold the button")}else if(mode==="count")cancelSOS();else if(mode==="active")imSafe()}
+ else if(a==="ob")onbAct(t.dataset.o)
+ else if(a==="cancel")cancelSOS();
+ else if(a==="resend")sendSMS(false);
+ else if(a==="fake"){fakeCall()}
+ else if(a==="facc")accept();else if(a==="fend")endCall();
+ else if(a==="del"){S.contacts.splice(+t.dataset.i,1);save();vib(40);draw()}
+ else if(a==="addc")sheet('<h3>Add Emergency Contact</h3><label>Name<input type="text" id="cn" autocomplete="off"></label><label>Phone number<input type="tel" id="cp" placeholder="+91 …" autocomplete="off"></label><button class="btn pri" data-a="savec">Save contact</button>');
+ else if(a==="savec"){var nm=$("#cn").value.trim(),ph=$("#cp").value.trim();if(!nm||ph.replace(/\D/g,"").length<7){toast("Enter a name and valid number");return}S.contacts.push({name:nm,phone:ph});save();chime();vib([20,40,20]);closeSheet()}
+ else if(a==="open")openS(t.dataset.s);
+ else if(a==="close")closeSheet();
+ else if(a==="tg"){var k=t.dataset.k;S[k]=!S[k];save();vib(30);t.querySelector(".chk").className="chk"+(S[k]?" on":"");t.querySelector(".chk").textContent=S[k]?"✓":""}
+ else if(a==="color"){S.color=t.dataset.c;save();document.documentElement.style.setProperty("--sos",S.color);document.querySelectorAll(".sw i").forEach(function(i){i.className=i===t?"on":""})}
+ else if(a==="test"){ctx();tone(880,.2,.3);vib([200,100,200]);toast(navigator.vibrate?"Testing…":"Vibration not supported on this device (e.g. iPhone)")}
+ else if(a==="dis"){S.dis=!S.dis;save();draw()}
+ else if(a==="dark"){S.dark=!S.dark;save();draw()}
+ else if(a==="map"){toast("In Google Maps: profile ▸ Offline maps ▸ Select your own map");window.open("https://www.google.com/maps","_blank")}
+});
+document.addEventListener("input",function(e){var k=e.target.dataset&&e.target.dataset.k;if(k&&e.target.dataset.n===undefined){S[k]=e.target.value;save()}});
+document.addEventListener("change",function(e){var k=e.target.dataset&&e.target.dataset.k;if(k&&e.target.dataset.n!==undefined){S[k]=+e.target.value;save()}});
+document.addEventListener("pointerdown",function(e){var b=e.target.closest(".big");if(!b||mode!=="idle")return;ctx();b.classList.add("holding");vib(15);tone(440,.08,.12);holdK=[300,600].map(function(ms,i){return setTimeout(function(){tone(520+i*180,.07,.18);vib(i?25:12)},ms)});holdT=setTimeout(function(){holdK=[];b.classList.remove("holding");holdT=null;startSOS()},900)});
+function rel(){if(holdT){clearTimeout(holdT);holdK.forEach(clearTimeout);holdK=[];holdT=null;var b=$(".big");if(b)b.classList.remove("holding")}}
+document.addEventListener("pointerup",rel);document.addEventListener("pointercancel",rel);
+document.addEventListener("contextmenu",function(e){if(e.target.closest(".big"))e.preventDefault()});
+document.addEventListener("keydown",function(e){var t=e.target;if((e.key==="Enter"||e.key===" ")&&t.getAttribute&&t.getAttribute("role")==="button"&&t.tagName!=="BUTTON"){e.preventDefault();t.click()}});
+function orow(d,t,s,o,b){return '<div class="row ob"><span class="chk'+(d?" on":"")+'">'+(d?"✓":"")+'</span><span class="g">'+t+'<small>'+s+'</small></span>'+(d?"":'<button class="mini" data-a="ob" data-o="'+o+'">'+b+'</button>')+'</div>'}
+function onb(){var real=S.contacts.some(function(c){return c.phone.indexOf("+91 98765 4321")<0});sheet('<h3>Get ready in a minute</h3><p class="sub">Do these once so SOS works when you need it.</p>'+orow(S.locOK,"Allow location","Shared with contacts during an alert","loc","Allow")+orow(real,"Add real contacts","Mom and Dad are sample numbers","con","Edit")+orow(S.testOK,"Test the alert","Plays the siren and vibrates briefly","test","Test")+'<button class="btn pri" data-a="ob" data-o="done">Done</button>')}
+function onbAct(o){
+ if(o==="loc"){if(!navigator.geolocation){toast("Location not supported here");return}navigator.geolocation.getCurrentPosition(function(){S.locOK=true;save();onb()},function(){toast("Location blocked. Enable it in your browser settings")},{timeout:8000})}
+ else if(o==="con"){$("#sheetbg").className="";tab="contacts";draw()}
+ else if(o==="test"){ctx();[650,950,650,950].forEach(function(f,i){setTimeout(function(){tone(f,.3,.35,"force")},i*320)});vib([200,100,200,100,200]);S.testOK=true;save();toast("Test played. Did you hear and feel it?");onb()}
+ else if(o==="done"){S.onb=true;save();closeSheet()}}
+if(!S.onb){S.onb=true;save();setTimeout(onb,600)}
+var hl=document.createElement("label");hl.setAttribute("aria-hidden","true");hl.style.cssText="position:fixed;left:-99px;top:-99px;opacity:0;pointer-events:none";hl.innerHTML='<input type="checkbox" switch tabindex="-1">';document.body.appendChild(hl);
+function tickIOS(){try{hl.click()}catch(e){}}
+function ut(f,d,v){if(S.ui)tone(f,d,v)}
+function chime(){tone(660,.12,.25);setTimeout(function(){tone(880,.2,.25)},110)}
+document.addEventListener("click",function(e){var t=e.target.closest("[data-a]");if(!t)return;var a=t.dataset.a;
+ if(a==="tab"){ut(520,.06,.12);vib(10)}
+ else if(a==="open"||a==="addc"||a==="close"||a==="ob"||a==="dis"||a==="dark"||a==="map"){ut(480,.06,.12);vib(10)}
+ else if(a==="del"){ut(200,.16,.2);vib([30,40,30])}
+ else if(a==="color"){ut(620,.06,.12);vib(12)}
+ else if(a==="tg"){ut(t.querySelector(".chk.on")?760:520,.07,.15)}
+ else if(a==="fake"||a==="resend"){ut(600,.08,.15);vib([30,40,30])}
+ else if(a==="cancel"){tone(420,.15,.25);setTimeout(function(){tone(300,.2,.25)},120);vib([40,40,40])}
+ else if(a==="sos"&&mode==="idle"&&e.detail!==0){ut(300,.1,.15);vib([20,30,20])}});
+document.addEventListener("change",function(e){if(e.target.dataset&&e.target.dataset.k==="vol"){ctx();tone(700,.15,.3);vib(15)}});
+$("#srin").addEventListener("keydown",function(e){if(e.key==="Enter"){var q=this.value.trim();if(!q){toast("Enter a destination");return}window.open("https://www.google.com/maps/dir/?api=1&travelmode=walking&destination="+encodeURIComponent(q),"_blank")}});
+draw();
+})();
+</script>
+</body>
+</html>
